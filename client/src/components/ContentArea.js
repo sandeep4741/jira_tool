@@ -4,12 +4,12 @@ import axios from 'axios';
 
 function ContentArea({ isCreateTaskOpen, userId, isAdmin, isUser, userName }) {
   const [tasks, setTasks] = useState([]);
-
+  
   const userTasks1 = tasks.filter(task => task.user_id === userId && task.status == 'qc');
   const userTasks2 = tasks.filter(task => task.user_id === userId && task.status == 'completed');
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/getCreatedTasks`)
+    axios.get('http://localhost:4000/getCreatedTasks')
       .then(response => {
         setTasks(response.data);
       })
@@ -17,63 +17,63 @@ function ContentArea({ isCreateTaskOpen, userId, isAdmin, isUser, userName }) {
         console.error(error);
       });
   }, []);
-
-  console.log(tasks);
+  
+  console.log(tasks); 
 
   const handleReadyTask = (taskId, userId) => {
-    axios.post(`${process.env.REACT_APP_BACKEND_URL}/readyTask`, { taskId, userId })
+    axios.post('http://localhost:4000/readyTask', { taskId, userId })
     const updatedTasks = tasks.map(task => {
       if (task.id === taskId) {
-        return { ...task, status: 'ready' };
+          return { ...task, status: 'ready' };
       }
       return task;
-    });
-    setTasks(updatedTasks)
+  });
+  setTasks(updatedTasks)
   };
-
+  
   const handleAcceptTask = (taskId, userId, userName) => {
-    axios.post(`${process.env.REACT_APP_BACKEND_URL}/acceptTask`, { taskId, userId, userName })
-      .then(response => {
-        const updatedTasks = tasks.map(task => {
-          if (task.id === taskId) {
-            return { ...task, status: 'tagged' };
-          }
-          return task;
-        });
-        setTasks(updatedTasks)
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    axios.post('http://localhost:4000/acceptTask', { taskId, userId, userName })
+    .then(response => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+          return { ...task, status: 'tagged' };
+      }
+      return task;
+  });
+  setTasks(updatedTasks)
+  })
+    .catch(error => {
+    console.error(error);
+   });
   };
 
   const handleSendQc = (taskId) => {
-    axios.post(`${process.env.REACT_APP_BACKEND_URL}/sendqc`, { taskId })
-      .then(response => {
-        const updatedTasks = tasks.map(task => {
-          if (task.id === taskId) {
-            return { ...task, status: 'qc' };
-          }
-          return task;
+    axios.post('http://localhost:4000/sendqc', { taskId })
+        .then(response => {
+            const updatedTasks = tasks.map(task => {
+                if (task.id === taskId) {
+                    return { ...task, status: 'qc' };
+                }
+                return task;
+            });
+            setTasks(updatedTasks);
+        })
+        .catch(error => {
+            console.error(error);
         });
-        setTasks(updatedTasks);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  };
+};
 
 
   const handleDone = (taskId) => {
-    axios.post(`${process.env.REACT_APP_BACKEND_URL}/done`, { taskId })
-      .then(response => {
-        const updatedTasks = tasks.map(task => {
+    axios.post('http://localhost:4000/done', { taskId })
+    .then(response => {
+      const updatedTasks = tasks.map(task => {
           if (task.id === taskId) {
-            return { ...task, status: 'completed' };
+              return { ...task, status: 'completed' };
           }
           return task;
-        });
-        setTasks(updatedTasks);
+      });
+      setTasks(updatedTasks);
       })
       .catch(error => {
         console.error(error);
@@ -95,15 +95,15 @@ function ContentArea({ isCreateTaskOpen, userId, isAdmin, isUser, userName }) {
       paddingLeft: '10px',
     },
     tasksColumn: {
-      flex: '1',
+      flex: '1', 
       width: '202px',
-      minHeight: '550px',
+      minHeight:'550px',
       margin: '5px',
-      marginRight: '8px',
-      padding: '10px',
+      marginRight:'8px',
+      padding:'10px',
       border: '1px solid #ccc',
       borderRadius: '5px',
-      backgroundColor: '#f0f0f0'
+      backgroundColor:'#f0f0f0'
     },
     task: {
       marginBottom: '20px',
@@ -147,7 +147,7 @@ function ContentArea({ isCreateTaskOpen, userId, isAdmin, isUser, userName }) {
         {CreatedTasks.map((task, index) => (
           <div key={index} className="task" style={styles.task}>
             <div>
-              <strong>Title:</strong> {task.title}
+                <strong>Title:</strong> {task.title}
             </div>
             {!isAdmin && <button style={styles.button} onClick={() => handleReadyTask(task.id, userId)}>Ready</button>}
           </div>
@@ -158,38 +158,38 @@ function ContentArea({ isCreateTaskOpen, userId, isAdmin, isUser, userName }) {
         {ReadyTasks.map((task, index) => (
           <div key={index} className="task" style={styles.task}>
             <div>
-              <strong>Title:</strong> {task.title}
+                <strong>Title:</strong> {task.title}
             </div>
-            {isAdmin && <button style={styles.button} onClick={() => handleAcceptTask(task.id, userId, userName)}>Accept</button>}
-          </div>
+        {isAdmin && <button style={styles.button} onClick={() => handleAcceptTask(task.id, userId, userName)}>Accept</button>}
+        </div>
         ))}
       </div>
       <div style={styles.tasksColumn}>
-        <h2>{isAdmin ? 'UserTasks' : 'Tagged'}</h2>
-        {(isAdmin ? userTasks : taggedTasks).map((task, index) => (
-          <div key={index} style={styles.task}>
+       <h2>{isAdmin ? 'UserTasks' : 'Tagged'}</h2>
+      {(isAdmin ? userTasks : taggedTasks).map((task, index) => (
+        <div key={index} style={styles.task}>
             <div>
-              <strong>Title:</strong> {task.title}
+                <strong>Title:</strong> {task.title}
             </div>
-            <div style={{ display: 'flex' }}>
-              <strong className='mr-1'>User ID :</strong>{task.user_id}
-              <div style={styles.avatar}>{task.User.charAt(0).toUpperCase()}</div>
+            <div style={{display:'flex'}}>
+            <strong className='mr-1'>User ID :</strong>{task.user_id}
+                <div style={styles.avatar}>{task.User.charAt(0).toUpperCase()}</div>
             </div>
             {isAdmin && <button style={styles.button} onClick={() => handleSendQc(task.id)}>Send to QC</button>}
-          </div>
+         </div>
         ))}
-      </div>
-
-      <div style={styles.tasksColumn}>
+     </div>
+     
+     <div style={styles.tasksColumn}>
         <h2>Qc</h2>
         {(isAdmin ? userTasks1 : qcTasks).map((task, index) => (
           <div key={index} style={styles.task}>
             <div>
-              <strong>Title:</strong> {task.title}
+                <strong>Title:</strong> {task.title}
             </div>
-            <div style={{ display: 'flex' }}>
-              <strong className='mr-1'>User ID :</strong> {task.user_id}
-              <div style={styles.avatar}>{task.User.charAt(0).toUpperCase()}</div>
+            <div style={{display:'flex'}}>
+                <strong className='mr-1'>User ID :</strong> {task.user_id}
+                <div style={styles.avatar}>{task.User.charAt(0).toUpperCase()}</div>
             </div>
             {isAdmin && <button style={styles.button} onClick={() => handleDone(task.id)}>Done</button>}
           </div>
@@ -199,16 +199,16 @@ function ContentArea({ isCreateTaskOpen, userId, isAdmin, isUser, userName }) {
         <h2>Completed</h2>
         {(isAdmin ? userTasks2 : doneTasks).map((task, index) => (
           <div key={index} className="task" style={styles.task}>
-            <div>
-              <strong>Title:</strong> {task.title}
+           <div>
+                <strong>Title:</strong> {task.title}
             </div>
-            <div style={{ display: 'flex' }}>
-              <strong className='mr-1'>User ID :</strong> {task.user_id}
-              <div style={styles.avatar}>{task.User.charAt(0).toUpperCase()}</div>
+            <div style={{display:'flex'}}>
+                <strong className='mr-1'>User ID :</strong> {task.user_id}
+                <div style={styles.avatar}>{task.User.charAt(0).toUpperCase()}</div>
             </div>
           </div>
         ))}
-      </div>
+      </div> 
       {isCreateTaskOpen && <TaskForm onCreateTask={handleCreateTask} />}
     </div>
   );
